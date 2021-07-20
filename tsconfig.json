@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "ES2016", // Node.js 12
+        "outDir": "./bin",
+        "strict": false
+    },
+    "include": [
+        "lib/*"
+    ],
+    "exclude": [
+        "node_modules",
+        "temp",
+        "**/*.spec.ts",
+        "db.json"
+    ]
+}
