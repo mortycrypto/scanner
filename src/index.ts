@@ -57,90 +57,96 @@ const printNetwork = () => {
 };
 
 const init = async () => {
+    try {
+        print();
 
-    print();
+        const { _network } = await Inquirer.Network();
+        if (_network === "Exit") process.exit(0);
+        selected_network = _network;
 
-    const { _network } = await Inquirer.Network();
-    if (_network === "Exit") process.exit(0);
-    selected_network = _network;
+        printNetwork();
 
-    printNetwork();
+        const { ScanType: _scanType } = await Inquirer.ScanType();
 
-    const { ScanType: _scanType } = await Inquirer.ScanType();
+        print();
+        printNetwork();
 
-    print();
-    printNetwork();
+        let data: Object;
 
-    let data: Object;
+        switch (_scanType) {
+            case "MasterChef":
+                const { mc: McAddress } = await Inquirer.MC();
 
-    switch (_scanType) {
-        case "MasterChef":
-            const { mc: McAddress } = await Inquirer.MC();
+                console.time('mark');
 
-            if (McAddress == "0" || !McAddress.toString().startsWith("0x")) {
-                init();
-                return;
-            }
+                if (McAddress == "0" || !McAddress.toString().startsWith("0x")) {
+                    init();
+                    return;
+                }
 
-            data = { ...data, ... await getMcData(McAddress, data, _network) };
+                data = { ...data, ... await getMcData(McAddress, data, _network) };
 
-            break;
-        case "Token":
-            const { token: address } = await Inquirer.Token();
+                break;
+            case "Token":
+                const { token: address } = await Inquirer.Token();
 
-            if (address == "0" || !address.toString().startsWith("0x")) {
-                init();
-                return;
-            }
+                if (address == "0" || !address.toString().startsWith("0x")) {
+                    init();
+                    return;
+                }
 
-            data = { ...data, ... await getTokenData(address, data) };
-            break;
-        case "Both":
-            const { both: bothAddress } = await Inquirer.Both();
+                data = { ...data, ... await getTokenData(address, data) };
+                break;
+            case "Both":
+                const { both: bothAddress } = await Inquirer.Both();
 
-            if (address == "0" || !address.toString().startsWith("0x")) {
-                init();
-                return;
-            }
+                if (address == "0" || !address.toString().startsWith("0x")) {
+                    init();
+                    return;
+                }
 
-            data = { ...data, ... await getMcData(bothAddress.toString().split("|")[0], data, _network) };
-            data = { ...data, ... await getTokenData(bothAddress.toString().split("|")[1], data) };
+                data = { ...data, ... await getMcData(bothAddress.toString().split("|")[0], data, _network) };
+                data = { ...data, ... await getTokenData(bothAddress.toString().split("|")[1], data) };
 
-            break;
-        default:
-            process.exit(0)
-            break;
-    }
-
-    if (data) {
-
-        const table = new Table({
-            head: ["Property", "Result"],
-            chars: {
-                top: "═",
-                "top-mid": "╤",
-                "top-left": "╔",
-                "top-right": "╗",
-                bottom: "═",
-                "bottom-mid": "╧",
-                "bottom-left": "╚",
-                "bottom-right": "╝",
-                left: "║",
-                "left-mid": "╟",
-                mid: "─",
-                "mid-mid": "┼",
-                right: "║",
-                "right-mid": "╢",
-                middle: "│",
-            },
-        });
-
-        for (const key in data) {
-            table.push([key, data[key]]);
+                break;
+            default:
+                process.exit(0)
+                break;
         }
 
-        console.log(table.toString());
+        if (data) {
 
+            const table = new Table({
+                head: ["Property", "Result"],
+                chars: {
+                    top: "═",
+                    "top-mid": "╤",
+                    "top-left": "╔",
+                    "top-right": "╗",
+                    bottom: "═",
+                    "bottom-mid": "╧",
+                    "bottom-left": "╚",
+                    "bottom-right": "╝",
+                    left: "║",
+                    "left-mid": "╟",
+                    mid: "─",
+                    "mid-mid": "┼",
+                    right: "║",
+                    "right-mid": "╢",
+                    middle: "│",
+                },
+            });
+
+            for (const key in data) {
+                table.push([key, data[key]]);
+            }
+
+            console.log(table.toString());
+
+            console.timeEnd('mark')
+        }
+    } catch (error) {
+        printError(error);
     }
 
 }

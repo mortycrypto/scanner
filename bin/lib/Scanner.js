@@ -57,33 +57,49 @@ class Scanner {
     }
     getAbi() {
         return __awaiter(this, void 0, void 0, function* () {
-            if (this.abi.length > 0)
+            try {
+                if (this.abi.length > 0)
+                    return this.abi;
+                // const file_path = `${process.cwd()}/temp/${this.address}.json`;
+                const file_path = `${__dirname}/../../temp/${this.address}.json`;
+                if (fs.existsSync(file_path)) {
+                    const content = yield fss.readFile(file_path);
+                    if (content.toString().startsWith('[')) {
+                        this.abi = JSON.parse(content.toString());
+                        return this.abi;
+                    }
+                }
+                const _abi = (yield axios_1.default.get(`https://api.${this.domain}.com/api?module=contract&action=getabi&address=${this.address}&apikey=${this.apiKey}`)).data.result;
+                yield fss.writeFile(file_path, _abi);
+                this.abi = _abi;
                 return this.abi;
-            // const file_path = `${process.cwd()}/temp/${this.address}.json`;
-            const file_path = `${__dirname}/../../temp/${this.address}.json`;
-            if (fs.existsSync(file_path)) {
-                const content = yield fss.readFile(file_path);
-                this.abi = JSON.parse(content.toString());
             }
-            const _abi = (yield axios_1.default.get(`https://api.${this.domain}.com/api?module=contract&action=getabi&address=${this.address}&apikey=${this.apiKey}`)).data.result;
-            yield fss.writeFile(file_path, _abi);
-            this.abi = _abi;
-            return this.abi;
+            catch (error) {
+                throw Error(`${error} (!Verified?)`);
+            }
         });
     }
     getCode() {
         return __awaiter(this, void 0, void 0, function* () {
-            if (this.code.length > 0)
+            try {
+                if (this.code.length > 0)
+                    return this.code;
+                const file_path = `${__dirname}/../../temp/codes/${this.address}.txt`;
+                if (fs.existsSync(file_path)) {
+                    const content = yield fss.readFile(file_path);
+                    if (content.toString() !== '') {
+                        this.code = content.toString();
+                        return this.code;
+                    }
+                }
+                const _code = (yield axios_1.default.get(`https://api.${this.domain}.com/api?module=contract&action=getsourcecode&address=${this.address}&apikey=${this.apiKey}`)).data.result[0].SourceCode;
+                yield fss.writeFile(file_path, _code);
+                this.code = _code;
                 return this.code;
-            const file_path = `${__dirname}/../../temp/codes/${this.address}.txt`;
-            if (fs.existsSync(file_path)) {
-                const content = yield fss.readFile(file_path);
-                this.code = content.toString();
             }
-            const _code = (yield axios_1.default.get(`https://api.${this.domain}.com/api?module=contract&action=getsourcecode&address=${this.address}&apikey=${this.apiKey}`)).data.result[0].SourceCode;
-            yield fss.writeFile(file_path, _code);
-            this.code = _code;
-            return this.code;
+            catch (error) {
+                throw Error(`${error} (!Verified?)`);
+            }
         });
     }
     init() {
@@ -123,9 +139,27 @@ class Scanner {
                     const prop = _d.value;
                     if (_instance[prop] && !prop.endsWith('|iseoa'))
                         obj[prop] = (yield _instance[prop]()).toString();
-                    if (this.TimelockCheck(_instance, prop)) {
+                    if (this.isContractCheck(_instance, prop)) {
                         const _prop = prop.replace('|iseoa', '');
                         obj[_prop] += (yield this.utils.isContract(obj[_prop])) ? ' (✅!EOA)' : ' (⚠️ EOA)';
+                    }
+                    if (prop.includes('|timelock')) {
+                        const _prop = prop.split('|')[0];
+                        if (obj[_prop] && obj[_prop].includes('!EOA)')) {
+                            const addr = obj[_prop].split(' ')[0];
+                            const tl = new ethers_1.ethers.Contract(addr, ['function delay() public view returns (uint256)'], this._provider);
+                            obj['Timelock'] = `${yield tl.delay()}`;
+                        }
+                    }
+                    if (prop.includes("|div:")) {
+                        const divisor = prop.split(':')[1];
+                        const _prop = prop.split('|')[0];
+                        if (this.Exists(_instance, _prop)) {
+                            obj[_prop] = ethers_1.BigNumber.from(yield _instance[_prop]()).div(divisor).toString();
+                        }
+                        else if (obj[_prop]) {
+                            obj[_prop] = ethers_1.BigNumber.from(obj[_prop]).div(divisor).toString();
+                        }
                     }
                     if (prop.includes('|unit:')) {
                         const unit = prop.split(':')[1];
@@ -136,12 +170,6 @@ class Scanner {
                     if (prop.endsWith("|exists")) {
                         const _prop = prop.replace('|exists', '');
                         obj[_prop] = !this.Exists(_instance, _prop) ? '✅ All Clear' : '🚨 WARNING! EXISTS!!';
-                    }
-                    if (prop.includes("|div:")) {
-                        const divisor = prop.split(':')[1];
-                        const _prop = prop.split('|')[0];
-                        if (this.Exists(_instance, _prop))
-                            obj[_prop] = ethers_1.BigNumber.from(yield _instance[_prop]()).div(divisor).toString();
                     }
                 }
             }
@@ -180,6 +208,8 @@ class Scanner {
                 obj['Countdown'] = `https://${this.domain}.com/block/countdown/${obj['startBlock']}`;
             if (obj['address'])
                 obj["Code"] = `https://${this.domain}.com/address/${obj['address']}#code`;
+            if (obj['Timelock'] && obj['owner'])
+                obj["TL Code"] = `https://${this.domain}.com/address/${obj['owner'].split(' ')[0]}#code`;
             return obj;
         });
     }
@@ -187,7 +217,7 @@ class Scanner {
         return __awaiter(this, void 0, void 0, function* () { });
     }
     ;
-    TimelockCheck(_instance, prop) {
+    isContractCheck(_instance, prop) {
         return _instance[prop.replace('|iseoa', '')] && prop.endsWith('|iseoa');
     }
     Exists(_instance, prop) {

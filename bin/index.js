@@ -49,71 +49,78 @@ const printNetwork = () => {
     console.log(text);
 };
 const init = () => __awaiter(void 0, void 0, void 0, function* () {
-    print();
-    const { _network } = yield inquirer_1.Inquirer.Network();
-    if (_network === "Exit")
-        process.exit(0);
-    selected_network = _network;
-    printNetwork();
-    const { ScanType: _scanType } = yield inquirer_1.Inquirer.ScanType();
-    print();
-    printNetwork();
-    let data;
-    switch (_scanType) {
-        case "MasterChef":
-            const { mc: McAddress } = yield inquirer_1.Inquirer.MC();
-            if (McAddress == "0" || !McAddress.toString().startsWith("0x")) {
-                init();
-                return;
-            }
-            data = Object.assign(Object.assign({}, data), yield getMcData(McAddress, data, _network));
-            break;
-        case "Token":
-            const { token: address } = yield inquirer_1.Inquirer.Token();
-            if (address == "0" || !address.toString().startsWith("0x")) {
-                init();
-                return;
-            }
-            data = Object.assign(Object.assign({}, data), yield getTokenData(address, data));
-            break;
-        case "Both":
-            const { both: bothAddress } = yield inquirer_1.Inquirer.Both();
-            if (address == "0" || !address.toString().startsWith("0x")) {
-                init();
-                return;
-            }
-            data = Object.assign(Object.assign({}, data), yield getMcData(bothAddress.toString().split("|")[0], data, _network));
-            data = Object.assign(Object.assign({}, data), yield getTokenData(bothAddress.toString().split("|")[1], data));
-            break;
-        default:
+    try {
+        print();
+        const { _network } = yield inquirer_1.Inquirer.Network();
+        if (_network === "Exit")
             process.exit(0);
-            break;
-    }
-    if (data) {
-        const table = new Table({
-            head: ["Property", "Result"],
-            chars: {
-                top: "═",
-                "top-mid": "╤",
-                "top-left": "╔",
-                "top-right": "╗",
-                bottom: "═",
-                "bottom-mid": "╧",
-                "bottom-left": "╚",
-                "bottom-right": "╝",
-                left: "║",
-                "left-mid": "╟",
-                mid: "─",
-                "mid-mid": "┼",
-                right: "║",
-                "right-mid": "╢",
-                middle: "│",
-            },
-        });
-        for (const key in data) {
-            table.push([key, data[key]]);
+        selected_network = _network;
+        printNetwork();
+        const { ScanType: _scanType } = yield inquirer_1.Inquirer.ScanType();
+        print();
+        printNetwork();
+        let data;
+        switch (_scanType) {
+            case "MasterChef":
+                const { mc: McAddress } = yield inquirer_1.Inquirer.MC();
+                console.time('mark');
+                if (McAddress == "0" || !McAddress.toString().startsWith("0x")) {
+                    init();
+                    return;
+                }
+                data = Object.assign(Object.assign({}, data), yield getMcData(McAddress, data, _network));
+                break;
+            case "Token":
+                const { token: address } = yield inquirer_1.Inquirer.Token();
+                if (address == "0" || !address.toString().startsWith("0x")) {
+                    init();
+                    return;
+                }
+                data = Object.assign(Object.assign({}, data), yield getTokenData(address, data));
+                break;
+            case "Both":
+                const { both: bothAddress } = yield inquirer_1.Inquirer.Both();
+                if (address == "0" || !address.toString().startsWith("0x")) {
+                    init();
+                    return;
+                }
+                data = Object.assign(Object.assign({}, data), yield getMcData(bothAddress.toString().split("|")[0], data, _network));
+                data = Object.assign(Object.assign({}, data), yield getTokenData(bothAddress.toString().split("|")[1], data));
+                break;
+            default:
+                process.exit(0);
+                break;
         }
-        console.log(table.toString());
+        if (data) {
+            const table = new Table({
+                head: ["Property", "Result"],
+                chars: {
+                    top: "═",
+                    "top-mid": "╤",
+                    "top-left": "╔",
+                    "top-right": "╗",
+                    bottom: "═",
+                    "bottom-mid": "╧",
+                    "bottom-left": "╚",
+                    "bottom-right": "╝",
+                    left: "║",
+                    "left-mid": "╟",
+                    mid: "─",
+                    "mid-mid": "┼",
+                    right: "║",
+                    "right-mid": "╢",
+                    middle: "│",
+                },
+            });
+            for (const key in data) {
+                table.push([key, data[key]]);
+            }
+            console.log(table.toString());
+            console.timeEnd('mark');
+        }
+    }
+    catch (error) {
+        printError(error);
     }
 });
 init();

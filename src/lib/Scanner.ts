@@ -52,51 +52,66 @@ export class Scanner {
     }
 
     private async getAbi(): Promise<string> {
-        if (this.abi.length > 0) return this.abi;
+        try {
+            if (this.abi.length > 0) return this.abi;
 
-        // const file_path = `${process.cwd()}/temp/${this.address}.json`;
-        const file_path = `${__dirname}/../../temp/${this.address}.json`;
+            // const file_path = `${process.cwd()}/temp/${this.address}.json`;
+            const file_path = `${__dirname}/../../temp/${this.address}.json`;
 
-        if (fs.existsSync(file_path)) {
-            const content = await fss.readFile(file_path);
-            this.abi = JSON.parse(content.toString());
+            if (fs.existsSync(file_path)) {
+                const content = await fss.readFile(file_path);
+                if (content.toString().startsWith('[')) {
+                    this.abi = JSON.parse(content.toString());
+                    return this.abi;
+                }
+            }
+
+            const _abi = (
+                await axios.get(
+                    `https://api.${this.domain}.com/api?module=contract&action=getabi&address=${this.address}&apikey=${this.apiKey}`
+                )
+            ).data.result;
+
+            await fss.writeFile(file_path, _abi);
+
+            this.abi = _abi;
+
+            return this.abi;
+
+        } catch (error) {
+            throw Error(`${error} (!Verified?)`)
         }
-
-        const _abi = (
-            await axios.get(
-                `https://api.${this.domain}.com/api?module=contract&action=getabi&address=${this.address}&apikey=${this.apiKey}`
-            )
-        ).data.result;
-
-        await fss.writeFile(file_path, _abi);
-
-        this.abi = _abi;
-
-        return this.abi;
-
     }
 
     protected async getCode(): Promise<string> {
-        if (this.code.length > 0) return this.code;
+        try {
 
-        const file_path = `${__dirname}/../../temp/codes/${this.address}.txt`;
+            if (this.code.length > 0) return this.code;
 
-        if (fs.existsSync(file_path)) {
-            const content = await fss.readFile(file_path);
-            this.code = content.toString();
+            const file_path = `${__dirname}/../../temp/codes/${this.address}.txt`;
+
+            if (fs.existsSync(file_path)) {
+                const content = await fss.readFile(file_path);
+                if (content.toString() !== '') {
+                    this.code = content.toString();
+                    return this.code;
+                }
+            }
+
+            const _code = (
+                await axios.get(
+                    `https://api.${this.domain}.com/api?module=contract&action=getsourcecode&address=${this.address}&apikey=${this.apiKey}`
+                )
+            ).data.result[0].SourceCode;
+
+            await fss.writeFile(file_path, _code);
+
+            this.code = _code;
+
+            return this.code;
+        } catch (error) {
+            throw Error(`${error} (!Verified?)`)
         }
-
-        const _code = (
-            await axios.get(
-                `https://api.${this.domain}.com/api?module=contract&action=getsourcecode&address=${this.address}&apikey=${this.apiKey}`
-            )
-        ).data.result[0].SourceCode;
-
-        await fss.writeFile(file_path, _code);
-
-        this.code = _code;
-
-        return this.code;
     }
 
     protected async init(): Promise<void> {
@@ -130,9 +145,28 @@ export class Scanner {
 
             if (_instance[prop] && !prop.endsWith('|iseoa')) obj[prop] = (await _instance[prop]()).toString();
 
-            if (this.TimelockCheck(_instance, prop)) {
+            if (this.isContractCheck(_instance, prop)) {
                 const _prop = prop.replace('|iseoa', '');
                 obj[_prop] += (await this.utils.isContract(obj[_prop])) ? ' (✅!EOA)' : ' (⚠️ EOA)';
+            }
+
+            if (prop.includes('|timelock')) {
+                const _prop = prop.split('|')[0];
+                if (obj[_prop] && obj[_prop].includes('!EOA)')) {
+                    const addr = obj[_prop].split(' ')[0]
+                    const tl = new ethers.Contract(addr, ['function delay() public view returns (uint256)'], this._provider);
+                    obj['Timelock'] = `${await tl.delay()}`
+                }
+            }
+
+            if (prop.includes("|div:")) {
+                const divisor = prop.split(':')[1];
+                const _prop = prop.split('|')[0];
+                if (this.Exists(_instance, _prop)) {
+                    obj[_prop] = BigNumber.from(await _instance[_prop]()).div(divisor).toString()
+                } else if (obj[_prop]) {
+                    obj[_prop] = BigNumber.from(obj[_prop]).div(divisor).toString();
+                }
             }
 
             if (prop.includes('|unit:')) {
@@ -144,12 +178,6 @@ export class Scanner {
             if (prop.endsWith("|exists")) {
                 const _prop = prop.replace('|exists', '');
                 obj[_prop] = !this.Exists(_instance, _prop) ? '✅ All Clear' : '🚨 WARNING! EXISTS!!';
-            }
-
-            if (prop.includes("|div:")) {
-                const divisor = prop.split(':')[1];
-                const _prop = prop.split('|')[0];
-                if (this.Exists(_instance, _prop)) obj[_prop] = BigNumber.from(await _instance[_prop]()).div(divisor).toString();
             }
 
         }
@@ -174,13 +202,14 @@ export class Scanner {
             obj['Countdown'] = `https://${this.domain}.com/block/countdown/${obj['startBlock']}`;
 
         if (obj['address']) obj["Code"] = `https://${this.domain}.com/address/${obj['address']}#code`
+        if (obj['Timelock'] && obj['owner']) obj["TL Code"] = `https://${this.domain}.com/address/${obj['owner'].split(' ')[0]}#code`
 
         return obj;
     }
 
     protected async _updateCacheHook(token: Token): Promise<void> { };
 
-    private TimelockCheck(_instance: Contract, prop: string): boolean {
+    private isContractCheck(_instance: Contract, prop: string): boolean {
         return _instance[prop.replace('|iseoa', '')] && prop.endsWith('|iseoa');
     }
 
