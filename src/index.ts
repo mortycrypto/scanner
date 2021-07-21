@@ -1,10 +1,10 @@
 #! /usr/bin/env node
 import { Moment } from "moment";
 
-import { Inquirer } from "./inquirer";
-import { Network } from './provider';
-import { TokenScanner } from "./TokenScanner";
-import { MCScanner } from "./MCScanner";
+import { Inquirer } from "./lib/inquirer";
+import { Domains, Network } from './lib/provider';
+import { TokenScanner } from "./lib/TokenScanner";
+import { MCScanner } from "./lib/MCScanner";
 import chalk = require("chalk");
 import figlet = require("figlet");
 import Table = require("cli-table");
@@ -39,7 +39,7 @@ const printNetwork = () => {
             );
             break;
         case "POLYGON":
-            network = Network.POLYGON2;
+            network = Network.POLYGON;
 
             text = chalk.bgCyanBright.black(
                 "POLYGON NETWORK" //, { horizontalLayout: "full" })
@@ -155,18 +155,5 @@ async function getTokenData(address: any, data: Object): Promise<Object> {
 
 async function getMcData(McAddress: string, data: Object, _network: string): Promise<Object> {
     const MC = await MCScanner.new(McAddress, network);
-    data = await MC.getProperties();
-
-    const domains = {
-        BSC: "bscscan",
-        POLYGON: "polygonscan",
-        FTM: "ftmscan",
-    };
-
-    if (data['startBlock'])
-        data['Countdown'] = `https://${domains[_network]}.com/block/countdown/${data['startBlock']}`;
-
-    if (data['address']) data["Code"] = `https://${domains[_network]}.com/address/${data['address']}#code`
-
-    return data;
+    return await MC.getProperties();
 }

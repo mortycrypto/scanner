@@ -10,10 +10,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const inquirer_1 = require("./inquirer");
-const provider_1 = require("./provider");
-const TokenScanner_1 = require("./TokenScanner");
-const MCScanner_1 = require("./MCScanner");
+const inquirer_1 = require("./lib/inquirer");
+const provider_1 = require("./lib/provider");
+const TokenScanner_1 = require("./lib/TokenScanner");
+const MCScanner_1 = require("./lib/MCScanner");
 const chalk = require("chalk");
 const figlet = require("figlet");
 const Table = require("cli-table");
@@ -36,7 +36,7 @@ const printNetwork = () => {
             );
             break;
         case "POLYGON":
-            network = provider_1.Network.POLYGON2;
+            network = provider_1.Network.POLYGON;
             text = chalk.bgCyanBright.black("POLYGON NETWORK" //, { horizontalLayout: "full" })
             );
             break;
@@ -127,16 +127,6 @@ function getTokenData(address, data) {
 function getMcData(McAddress, data, _network) {
     return __awaiter(this, void 0, void 0, function* () {
         const MC = yield MCScanner_1.MCScanner.new(McAddress, network);
-        data = yield MC.getProperties();
-        const domains = {
-            BSC: "bscscan",
-            POLYGON: "polygonscan",
-            FTM: "ftmscan",
-        };
-        if (data['startBlock'])
-            data['Countdown'] = `https://${domains[_network]}.com/block/countdown/${data['startBlock']}`;
-        if (data['address'])
-            data["Code"] = `https://${domains[_network]}.com/address/${data['address']}#code`;
-        return data;
+        return yield MC.getProperties();
     });
 }

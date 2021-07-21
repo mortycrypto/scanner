@@ -27,10 +27,17 @@ const DBCache_1 = require("./DBCache");
 class Scanner {
     constructor(address, network) {
         this.abi = '';
+        this.code = '';
         this.StaticProperties = [];
         this.FunctionProperties = [];
         this.address = address;
         this.network = network;
+        for (const [value, name] of Object.entries(provider_1.Network)) {
+            if (this.network === name) {
+                this.domain = provider_1.Domains[value];
+                this.apiKey = provider_1.ApiKeys[value];
+            }
+        }
         this.utils = new utils_1.Utils(network);
     }
     isValid() {
@@ -53,21 +60,37 @@ class Scanner {
             if (this.abi.length > 0)
                 return this.abi;
             // const file_path = `${process.cwd()}/temp/${this.address}.json`;
-            const file_path = `${__dirname}/../temp/${this.address}.json`;
+            const file_path = `${__dirname}/../../temp/${this.address}.json`;
             if (fs.existsSync(file_path)) {
                 const content = yield fss.readFile(file_path);
                 this.abi = JSON.parse(content.toString());
             }
-            const _abi = (yield axios_1.default.get(`https://api.${this.network === provider_1.Network.BSC ? "bscscan" : "polygonscan"}.com/api?module=contract&action=getabi&address=${this.address}&apikey=${this.network === provider_1.Network.BSC ? 'HVUJ1ZG4KNVTDCMQQBJA711QMFKJXPWNQT' : 'T2Q3CVQQK8B1G7I29I1CM1V7M767WHZCZT'}`)).data.result;
+            const _abi = (yield axios_1.default.get(`https://api.${this.domain}.com/api?module=contract&action=getabi&address=${this.address}&apikey=${this.apiKey}`)).data.result;
             yield fss.writeFile(file_path, _abi);
             this.abi = _abi;
             return this.abi;
+        });
+    }
+    getCode() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this.code.length > 0)
+                return this.code;
+            const file_path = `${__dirname}/../../temp/codes/${this.address}.txt`;
+            if (fs.existsSync(file_path)) {
+                const content = yield fss.readFile(file_path);
+                this.code = content.toString();
+            }
+            const _code = (yield axios_1.default.get(`https://api.${this.domain}.com/api?module=contract&action=getsourcecode&address=${this.address}&apikey=${this.apiKey}`)).data.result[0].SourceCode;
+            yield fss.writeFile(file_path, _code);
+            this.code = _code;
+            return this.code;
         });
     }
     init() {
         return __awaiter(this, void 0, void 0, function* () {
             if (!this.instance) {
                 this.abi = yield this.getAbi();
+                this.code = yield this.getCode();
                 this._provider = yield (new provider_1.RPCConnection(this.network)).connect();
                 this.instance = new ethers_1.ethers.Contract(this.address, this.abi, this._provider);
                 this._cache = yield DBCache_1.DBCache.new();
@@ -153,6 +176,10 @@ class Scanner {
             if (obj["symbol"]) {
                 yield this._updateCacheHook({ symbol: obj["symbol"], address: this.address });
             }
+            if (obj['startBlock'])
+                obj['Countdown'] = `https://${this.domain}.com/block/countdown/${obj['startBlock']}`;
+            if (obj['address'])
+                obj["Code"] = `https://${this.domain}.com/address/${obj['address']}#code`;
             return obj;
         });
     }

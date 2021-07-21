@@ -60,7 +60,7 @@ class Cache {
     }
     save() {
         return __awaiter(this, void 0, void 0, function* () {
-            yield fss.writeFile(`${__dirname}/../db.json`, JSON.stringify(this.file));
+            yield fss.writeFile(`${this.path}`, JSON.stringify(this.file));
         });
     }
 }

@@ -58,6 +58,6 @@ export class Cache {
     }
 
     public async save(): Promise<void> {
-        await fss.writeFile(`${__dirname}/../db.json`, JSON.stringify(this.file));
+        await fss.writeFile(`${this.path}`, JSON.stringify(this.file));
     }
 }

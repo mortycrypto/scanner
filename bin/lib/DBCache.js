@@ -17,7 +17,7 @@ class DBCache extends Cache_1.Cache {
             new: { get: () => super.new }
         });
         return __awaiter(this, void 0, void 0, function* () {
-            return _super.new.call(this, `${__dirname}/../db.json`);
+            return _super.new.call(this, `${__dirname}/../../db.json`);
         });
     }
 }

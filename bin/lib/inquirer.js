@@ -62,7 +62,7 @@ const network = () => {
             name: "_network",
             message: "Select Netowork",
             type: "list",
-            choices: ["BSC", "POLYGON", "Exit"],
+            choices: ["BSC", "POLYGON", "FTM", "Exit"],
         },
     ];
     return inquirer.prompt(question);
