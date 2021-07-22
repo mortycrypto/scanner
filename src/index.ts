@@ -5,6 +5,7 @@ import { Inquirer } from "./lib/inquirer";
 import { Domains, Network } from './lib/provider';
 import { TokenScanner } from "./lib/TokenScanner";
 import { MCScanner } from "./lib/MCScanner";
+import { TimelockScanner } from './lib/TimelockScanner';
 import chalk = require("chalk");
 import figlet = require("figlet");
 import Table = require("cli-table");
@@ -90,12 +91,35 @@ const init = async () => {
             case "Token":
                 const { token: address } = await Inquirer.Token();
 
+                console.time('mark');
+
                 if (address == "0" || !address.toString().startsWith("0x")) {
                     init();
                     return;
                 }
 
                 data = { ...data, ... await getTokenData(address, data) };
+                break;
+            case "Timelock":
+                const { timelock:input } = await Inquirer.Timelock();
+
+                const _info:string[] = (<string>input).split("|");
+                let TlAddress = _info[0];
+                let from = <number> (_info.length > 1 ? _info[1] : 0);
+                let to = <number> (_info.length > 2 ? _info[2] : 0);
+                
+                if (TlAddress == "0" || !TlAddress.toString().startsWith("0x")) {
+                    init();
+                    return;
+                }
+
+                console.time('mark');
+
+                // "0x93707607dB30758Cc612387216E10993971A9ad2"
+                const tl = await TimelockScanner.new(TlAddress, from, to, network);
+
+                data = { ...data, ... await tl.getProperties() };
+
                 break;
             case "Both":
                 const { both: bothAddress } = await Inquirer.Both();

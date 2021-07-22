@@ -1,5 +1,24 @@
 const inquirer = require("inquirer");
 
+const timelock = () => {
+    const question = [
+        {
+            name: "timelock",
+            message: "Timelock Info (Address|From|To) (Enter 0 to return to main menu): ",
+            type: "input",
+            validate: function (value) {
+                if (value.length) {
+                    return true;
+                } else {
+                    return "Please enter a value.";
+                }
+            },
+        },
+    ];
+
+    return inquirer.prompt(question);
+};
+
 const token = () => {
     const question = [
         {
@@ -76,7 +95,7 @@ const scanType = () => {
             name: "ScanType",
             message: "Scan Type",
             type: "list",
-            choices: ["MasterChef", "Token", "Both", "Change Network", "Exit"],
+            choices: ["MasterChef", "Token", "Timelock", "Both", "Change Network", "Exit"],
         },
     ];
 
@@ -89,4 +108,5 @@ export const Inquirer = {
     Token: token,
     MC: mc,
     Both: both,
+    Timelock:timelock
 };

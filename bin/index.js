@@ -14,6 +14,7 @@ const inquirer_1 = require("./lib/inquirer");
 const provider_1 = require("./lib/provider");
 const TokenScanner_1 = require("./lib/TokenScanner");
 const MCScanner_1 = require("./lib/MCScanner");
+const TimelockScanner_1 = require("./lib/TimelockScanner");
 const chalk = require("chalk");
 const figlet = require("figlet");
 const Table = require("cli-table");
@@ -72,11 +73,27 @@ const init = () => __awaiter(void 0, void 0, void 0, function* () {
                 break;
             case "Token":
                 const { token: address } = yield inquirer_1.Inquirer.Token();
+                console.time('mark');
                 if (address == "0" || !address.toString().startsWith("0x")) {
                     init();
                     return;
                 }
                 data = Object.assign(Object.assign({}, data), yield getTokenData(address, data));
+                break;
+            case "Timelock":
+                const { timelock: input } = yield inquirer_1.Inquirer.Timelock();
+                const _info = input.split("|");
+                let TlAddress = _info[0];
+                let from = (_info.length > 1 ? _info[1] : 0);
+                let to = (_info.length > 2 ? _info[2] : 0);
+                if (TlAddress == "0" || !TlAddress.toString().startsWith("0x")) {
+                    init();
+                    return;
+                }
+                console.time('mark');
+                // "0x93707607dB30758Cc612387216E10993971A9ad2"
+                const tl = yield TimelockScanner_1.TimelockScanner.new(TlAddress, from, to, network);
+                data = Object.assign(Object.assign({}, data), yield tl.getProperties());
                 break;
             case "Both":
                 const { both: bothAddress } = yield inquirer_1.Inquirer.Both();
