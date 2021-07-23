@@ -91,8 +91,9 @@ const init = () => __awaiter(void 0, void 0, void 0, function* () {
                     return;
                 }
                 console.time('mark');
-                // "0x93707607dB30758Cc612387216E10993971A9ad2"
-                const tl = yield TimelockScanner_1.TimelockScanner.new(TlAddress, from, to, network);
+                // POLYGON => "0x93707607dB30758Cc612387216E10993971A9ad2|17143918"
+                const tl = yield TimelockScanner_1.TimelockScanner.new(TlAddress, network);
+                tl.setPeriod(from, to);
                 data = Object.assign(Object.assign({}, data), yield tl.getProperties());
                 break;
             case "Both":

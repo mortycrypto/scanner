@@ -115,8 +115,9 @@ const init = async () => {
 
                 console.time('mark');
 
-                // "0x93707607dB30758Cc612387216E10993971A9ad2"
-                const tl = await TimelockScanner.new(TlAddress, from, to, network);
+                // POLYGON => "0x93707607dB30758Cc612387216E10993971A9ad2|17143918"
+                const tl = await TimelockScanner.new(TlAddress,network);
+                tl.setPeriod(from, to);
 
                 data = { ...data, ... await tl.getProperties() };
 

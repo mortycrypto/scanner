@@ -14,8 +14,8 @@ export class Scanner {
     readonly network: Network;
     private abi: string = '';
     private code: string = '';
-    private _provider: ethers.providers.JsonRpcProvider;
-    private instance: ethers.Contract;
+    protected _provider: ethers.providers.JsonRpcProvider;
+    protected instance: ethers.Contract;
     protected _cache: DBCache;
     readonly domain: string;
     readonly apiKey: string;
