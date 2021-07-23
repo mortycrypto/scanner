@@ -27,7 +27,6 @@ class TimelockScanner extends Scanner_1.Scanner {
         });
     }
     setPeriod(from, to) {
-        console.log(from, to);
         this.from = from;
         this.to = to;
     }

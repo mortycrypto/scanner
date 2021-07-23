@@ -141,9 +141,34 @@ export class Scanner {
 
         const _instance = await this.getInstance();
 
+        console.time('getProperties2')
+
+        let predata = [];
+        for (const prop of this.StaticProperties) {
+            if (_instance[prop] && !prop.endsWith('|iseoa')) predata.push(_instance[prop]());
+        }
+
+        let _data = await Promise.all(predata);
+        let cont = 0;
+
+        for (let i = 0; i < this.StaticProperties.length; i++) {
+
+            const prop = this.StaticProperties[i];
+
+            if (_instance[prop] && !prop.endsWith('|iseoa')) {
+                obj[prop] = _data[cont].toString();
+                cont += 1;
+            }
+
+        }
+
+        console.timeEnd('getProperties2')
+
+        console.time('getProperties')
+
         for await (const prop of this.StaticProperties) {
 
-            if (_instance[prop] && !prop.endsWith('|iseoa')) obj[prop] = (await _instance[prop]()).toString();
+            //if (_instance[prop] && !prop.endsWith('|iseoa')) obj[prop] = (await _instance[prop]()).toString();
 
             if (this.isContractCheck(_instance, prop)) {
                 const _prop = prop.replace('|iseoa', '');
@@ -181,6 +206,8 @@ export class Scanner {
             }
 
         }
+
+        console.timeEnd('getProperties')
 
         for await (const prop of this.FunctionProperties) {
             const p = prop.indexOf('(');

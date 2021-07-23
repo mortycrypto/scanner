@@ -134,11 +134,27 @@ class Scanner {
                 address: this.address
             };
             const _instance = yield this.getInstance();
+            console.time('getProperties2');
+            let predata = [];
+            for (const prop of this.StaticProperties) {
+                if (_instance[prop] && !prop.endsWith('|iseoa'))
+                    predata.push(_instance[prop]());
+            }
+            let _data = yield Promise.all(predata);
+            let cont = 0;
+            for (let i = 0; i < this.StaticProperties.length; i++) {
+                const prop = this.StaticProperties[i];
+                if (_instance[prop] && !prop.endsWith('|iseoa')) {
+                    obj[prop] = _data[cont].toString();
+                    cont += 1;
+                }
+            }
+            console.timeEnd('getProperties2');
+            console.time('getProperties');
             try {
                 for (var _c = __asyncValues(this.StaticProperties), _d; _d = yield _c.next(), !_d.done;) {
                     const prop = _d.value;
-                    if (_instance[prop] && !prop.endsWith('|iseoa'))
-                        obj[prop] = (yield _instance[prop]()).toString();
+                    //if (_instance[prop] && !prop.endsWith('|iseoa')) obj[prop] = (await _instance[prop]()).toString();
                     if (this.isContractCheck(_instance, prop)) {
                         const _prop = prop.replace('|iseoa', '');
                         obj[_prop] += (yield this.utils.isContract(obj[_prop])) ? ' (✅!EOA)' : ' (⚠️ EOA)';
@@ -180,6 +196,7 @@ class Scanner {
                 }
                 finally { if (e_1) throw e_1.error; }
             }
+            console.timeEnd('getProperties');
             try {
                 for (var _e = __asyncValues(this.FunctionProperties), _f; _f = yield _e.next(), !_f.done;) {
                     const prop = _f.value;
