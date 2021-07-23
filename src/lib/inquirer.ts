@@ -4,7 +4,26 @@ const timelock = () => {
     const question = [
         {
             name: "timelock",
-            message: "Timelock Info (Address|From|To) (Enter 0 to return to main menu): ",
+            message: "Timelock Address (Enter 0 to return to main menu): ",
+            type: "input",
+            validate: function (value) {
+                if (value.length) {
+                    return true;
+                } else {
+                    return "Please enter a value.";
+                }
+            },
+        },
+    ];
+
+    return inquirer.prompt(question);
+};
+
+const block = (desc: string) => {
+    const question = [
+        {
+            name: "block",
+            message: `${desc} Block (Enter 0 to return to main menu): `,
             type: "input",
             validate: function (value) {
                 if (value.length) {
@@ -108,5 +127,6 @@ export const Inquirer = {
     Token: token,
     MC: mc,
     Both: both,
-    Timelock:timelock
+    Timelock: timelock,
+    Block: block
 };

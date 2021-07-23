@@ -1,10 +1,10 @@
 import { Address } from './Cache';
 import { Network } from './provider';
-import {Scanner} from './Scanner';
+import { Scanner } from './Scanner';
 
 export class TimelockScanner extends Scanner {
     private from: number;
-    private to:number;
+    private to: number;
 
     protected StaticProperties: string[] = [
         'delay',
@@ -21,23 +21,22 @@ export class TimelockScanner extends Scanner {
         return new TimelockScanner(address, network);
     }
 
-    public setPeriod(from:number, to:number):void{
-        console.log(from,to);
+    public setPeriod(from: number, to: number): void {
         this.from = from;
         this.to = to;
     }
 
-    private async getCurrentBlock():Promise<number>{
+    private async getCurrentBlock(): Promise<number> {
         return await this._provider.getBlockNumber();
     }
-    
+
     public async getProperties(): Promise<Object> {
 
         if (this.from < 800000) throw new Error(`From too back {FROM: ${this.from}}`);
         if (this.to < this.from && this.to > 0) throw new Error(`BAD {FROM: ${this.from} TO: ${this.to}}`);
 
-        const data:Object = await super.getProperties();
-        
+        const data: Object = await super.getProperties();
+
         let obj = {
             address: this.address,
             fromBlock: this.from,

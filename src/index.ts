@@ -101,14 +101,11 @@ const init = async () => {
                 data = { ...data, ... await getTokenData(address, data) };
                 break;
             case "Timelock":
-                const { timelock:input } = await Inquirer.Timelock();
+                const { timelock } = await Inquirer.Timelock();
+                const { block: from } = await Inquirer.Block("From");
+                const { block: to } = await Inquirer.Block("To");
 
-                const _info:string[] = (<string>input).split("|");
-                let TlAddress = _info[0];
-                let from = <number> (_info.length > 1 ? _info[1] : 0);
-                let to = <number> (_info.length > 2 ? _info[2] : 0);
-                
-                if (TlAddress == "0" || !TlAddress.toString().startsWith("0x")) {
+                if (timelock == "0" || !timelock.toString().startsWith("0x")) {
                     init();
                     return;
                 }
@@ -116,7 +113,7 @@ const init = async () => {
                 console.time('mark');
 
                 // POLYGON => "0x93707607dB30758Cc612387216E10993971A9ad2|17143918"
-                const tl = await TimelockScanner.new(TlAddress,network);
+                const tl = await TimelockScanner.new(timelock, network);
                 tl.setPeriod(from, to);
 
                 data = { ...data, ... await tl.getProperties() };

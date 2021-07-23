@@ -81,18 +81,16 @@ const init = () => __awaiter(void 0, void 0, void 0, function* () {
                 data = Object.assign(Object.assign({}, data), yield getTokenData(address, data));
                 break;
             case "Timelock":
-                const { timelock: input } = yield inquirer_1.Inquirer.Timelock();
-                const _info = input.split("|");
-                let TlAddress = _info[0];
-                let from = (_info.length > 1 ? _info[1] : 0);
-                let to = (_info.length > 2 ? _info[2] : 0);
-                if (TlAddress == "0" || !TlAddress.toString().startsWith("0x")) {
+                const { timelock } = yield inquirer_1.Inquirer.Timelock();
+                const { block: from } = yield inquirer_1.Inquirer.Block("From");
+                const { block: to } = yield inquirer_1.Inquirer.Block("To");
+                if (timelock == "0" || !timelock.toString().startsWith("0x")) {
                     init();
                     return;
                 }
                 console.time('mark');
                 // POLYGON => "0x93707607dB30758Cc612387216E10993971A9ad2|17143918"
-                const tl = yield TimelockScanner_1.TimelockScanner.new(TlAddress, network);
+                const tl = yield TimelockScanner_1.TimelockScanner.new(timelock, network);
                 tl.setPeriod(from, to);
                 data = Object.assign(Object.assign({}, data), yield tl.getProperties());
                 break;
