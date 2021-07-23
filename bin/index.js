@@ -107,39 +107,42 @@ const init = () => __awaiter(void 0, void 0, void 0, function* () {
                 process.exit(0);
                 break;
         }
-        if (data) {
-            const table = new Table({
-                head: ["Property", "Result"],
-                chars: {
-                    top: "═",
-                    "top-mid": "╤",
-                    "top-left": "╔",
-                    "top-right": "╗",
-                    bottom: "═",
-                    "bottom-mid": "╧",
-                    "bottom-left": "╚",
-                    "bottom-right": "╝",
-                    left: "║",
-                    "left-mid": "╟",
-                    mid: "─",
-                    "mid-mid": "┼",
-                    right: "║",
-                    "right-mid": "╢",
-                    middle: "│",
-                },
-            });
-            for (const key in data) {
-                table.push([key, data[key]]);
-            }
-            console.log(table.toString());
-            console.timeEnd('mark');
-        }
+        showData(data);
+        console.timeEnd('mark');
     }
     catch (error) {
         printError(error);
     }
 });
 init();
+function showData(data) {
+    if (data) {
+        const table = new Table({
+            head: ["Property", "Result"],
+            chars: {
+                top: "═",
+                "top-mid": "╤",
+                "top-left": "╔",
+                "top-right": "╗",
+                bottom: "═",
+                "bottom-mid": "╧",
+                "bottom-left": "╚",
+                "bottom-right": "╝",
+                left: "║",
+                "left-mid": "╟",
+                mid: "─",
+                "mid-mid": "┼",
+                right: "║",
+                "right-mid": "╢",
+                middle: "│",
+            },
+        });
+        for (const key in data) {
+            table.push([key, data[key]]);
+        }
+        console.log(table.toString());
+    }
+}
 function getTokenData(address, data) {
     return __awaiter(this, void 0, void 0, function* () {
         const ERC20 = yield TokenScanner_1.TokenScanner.new(address, network);

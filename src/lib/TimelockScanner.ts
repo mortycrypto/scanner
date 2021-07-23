@@ -10,7 +10,11 @@ export class TimelockScanner extends Scanner {
         'delay',
         'delay|div:3600',
         'delay|unit:hs',
-        'admin'
+        'minDelay',
+        'minDelay|div:3600',
+        'minDelay|unit:hs',
+        'admin',
+        'devWalletAddress'
     ];
 
     protected constructor(address: Address, network: Network) {

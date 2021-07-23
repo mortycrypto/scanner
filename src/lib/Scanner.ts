@@ -116,11 +116,20 @@ export class Scanner {
 
     protected async init(): Promise<void> {
         if (!this.instance) {
-            this.abi = await this.getAbi();
-            this.code = await this.getCode();
-            this._provider = await (new RPCConnection(this.network)).connect();
+            let predata = [
+                this.getAbi(),
+                this.getCode(),
+                (new RPCConnection(this.network)).connect(),
+                DBCache.new()
+            ];
+
+            let _initials = await Promise.all(<any>predata);
+
+            this.abi = <string>_initials[0]; //await this.getAbi();
+            this.code = <string>_initials[1]; //await this.getCode();
+            this._provider = <ethers.providers.JsonRpcProvider>_initials[2]; //await (new RPCConnection(this.network)).connect();
             this.instance = new ethers.Contract(this.address, this.abi, this._provider);
-            this._cache = await DBCache.new();
+            this._cache = <DBCache>_initials[3]; //await DBCache.new();
         }
     }
 
@@ -141,8 +150,6 @@ export class Scanner {
 
         const _instance = await this.getInstance();
 
-        console.time('getProperties2')
-
         let predata = [];
         for (const prop of this.StaticProperties) {
             if (_instance[prop] && !prop.endsWith('|iseoa')) predata.push(_instance[prop]());
@@ -162,13 +169,7 @@ export class Scanner {
 
         }
 
-        console.timeEnd('getProperties2')
-
-        console.time('getProperties')
-
         for await (const prop of this.StaticProperties) {
-
-            //if (_instance[prop] && !prop.endsWith('|iseoa')) obj[prop] = (await _instance[prop]()).toString();
 
             if (this.isContractCheck(_instance, prop)) {
                 const _prop = prop.replace('|iseoa', '');
@@ -206,8 +207,6 @@ export class Scanner {
             }
 
         }
-
-        console.timeEnd('getProperties')
 
         for await (const prop of this.FunctionProperties) {
             const p = prop.indexOf('(');

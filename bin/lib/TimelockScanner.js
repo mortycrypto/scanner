@@ -18,7 +18,11 @@ class TimelockScanner extends Scanner_1.Scanner {
             'delay',
             'delay|div:3600',
             'delay|unit:hs',
-            'admin'
+            'minDelay',
+            'minDelay|div:3600',
+            'minDelay|unit:hs',
+            'admin',
+            'devWalletAddress'
         ];
     }
     static new(address, network) {

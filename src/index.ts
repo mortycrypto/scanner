@@ -136,37 +136,10 @@ const init = async () => {
                 break;
         }
 
-        if (data) {
+        showData(data);
 
-            const table = new Table({
-                head: ["Property", "Result"],
-                chars: {
-                    top: "═",
-                    "top-mid": "╤",
-                    "top-left": "╔",
-                    "top-right": "╗",
-                    bottom: "═",
-                    "bottom-mid": "╧",
-                    "bottom-left": "╚",
-                    "bottom-right": "╝",
-                    left: "║",
-                    "left-mid": "╟",
-                    mid: "─",
-                    "mid-mid": "┼",
-                    right: "║",
-                    "right-mid": "╢",
-                    middle: "│",
-                },
-            });
+        console.timeEnd('mark')
 
-            for (const key in data) {
-                table.push([key, data[key]]);
-            }
-
-            console.log(table.toString());
-
-            console.timeEnd('mark')
-        }
     } catch (error) {
         printError(error);
     }
@@ -174,6 +147,39 @@ const init = async () => {
 }
 
 init();
+
+function showData(data: Object) {
+    if (data) {
+
+        const table = new Table({
+            head: ["Property", "Result"],
+            chars: {
+                top: "═",
+                "top-mid": "╤",
+                "top-left": "╔",
+                "top-right": "╗",
+                bottom: "═",
+                "bottom-mid": "╧",
+                "bottom-left": "╚",
+                "bottom-right": "╝",
+                left: "║",
+                "left-mid": "╟",
+                mid: "─",
+                "mid-mid": "┼",
+                right: "║",
+                "right-mid": "╢",
+                middle: "│",
+            },
+        });
+
+        for (const key in data) {
+            table.push([key, data[key]]);
+        }
+
+        console.log(table.toString());
+
+    }
+}
 
 async function getTokenData(address: any, data: Object): Promise<Object> {
     const ERC20 = await TokenScanner.new(address, network);

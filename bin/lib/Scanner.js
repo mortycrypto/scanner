@@ -105,11 +105,18 @@ class Scanner {
     init() {
         return __awaiter(this, void 0, void 0, function* () {
             if (!this.instance) {
-                this.abi = yield this.getAbi();
-                this.code = yield this.getCode();
-                this._provider = yield (new provider_1.RPCConnection(this.network)).connect();
+                let predata = [
+                    this.getAbi(),
+                    this.getCode(),
+                    (new provider_1.RPCConnection(this.network)).connect(),
+                    DBCache_1.DBCache.new()
+                ];
+                let _initials = yield Promise.all(predata);
+                this.abi = _initials[0]; //await this.getAbi();
+                this.code = _initials[1]; //await this.getCode();
+                this._provider = _initials[2]; //await (new RPCConnection(this.network)).connect();
                 this.instance = new ethers_1.ethers.Contract(this.address, this.abi, this._provider);
-                this._cache = yield DBCache_1.DBCache.new();
+                this._cache = _initials[3]; //await DBCache.new();
             }
         });
     }
@@ -134,7 +141,6 @@ class Scanner {
                 address: this.address
             };
             const _instance = yield this.getInstance();
-            console.time('getProperties2');
             let predata = [];
             for (const prop of this.StaticProperties) {
                 if (_instance[prop] && !prop.endsWith('|iseoa'))
@@ -149,12 +155,9 @@ class Scanner {
                     cont += 1;
                 }
             }
-            console.timeEnd('getProperties2');
-            console.time('getProperties');
             try {
                 for (var _c = __asyncValues(this.StaticProperties), _d; _d = yield _c.next(), !_d.done;) {
                     const prop = _d.value;
-                    //if (_instance[prop] && !prop.endsWith('|iseoa')) obj[prop] = (await _instance[prop]()).toString();
                     if (this.isContractCheck(_instance, prop)) {
                         const _prop = prop.replace('|iseoa', '');
                         obj[_prop] += (yield this.utils.isContract(obj[_prop])) ? ' (✅!EOA)' : ' (⚠️ EOA)';
@@ -196,7 +199,6 @@ class Scanner {
                 }
                 finally { if (e_1) throw e_1.error; }
             }
-            console.timeEnd('getProperties');
             try {
                 for (var _e = __asyncValues(this.FunctionProperties), _f; _f = yield _e.next(), !_f.done;) {
                     const prop = _f.value;
