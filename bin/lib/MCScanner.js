@@ -12,8 +12,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MCScanner = void 0;
 const Scanner_1 = require("./Scanner");
 class MCScanner extends Scanner_1.Scanner {
-    constructor(address, network) {
-        super(address, network);
+    constructor(address, network, noCache) {
+        super(address, network, noCache);
         this.StaticProperties = [
             'startBlock',
             'owner',
@@ -42,9 +42,9 @@ class MCScanner extends Scanner_1.Scanner {
             'totalAllocPoint',
         ];
     }
-    static new(address, network) {
+    static new(address, network, noCache) {
         return __awaiter(this, void 0, void 0, function* () {
-            return new MCScanner(address, network);
+            return new MCScanner(address, network, noCache);
         });
     }
 }

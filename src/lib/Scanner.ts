@@ -94,11 +94,13 @@ export class Scanner {
 
             const file_path = `${__dirname}/../../temp/codes/${this.address}.txt`;
 
-            if (fs.existsSync(file_path)) {
-                const content = await fss.readFile(file_path);
-                if (content.toString() !== '') {
-                    this.code = content.toString();
-                    return this.code;
+            if (!this.noCache) {
+                if (fs.existsSync(file_path)) {
+                    const content = await fss.readFile(file_path);
+                    if (content.toString() !== '') {
+                        this.code = content.toString();
+                        return this.code;
+                    }
                 }
             }
 
@@ -108,7 +110,7 @@ export class Scanner {
                 )
             ).data.result[0].SourceCode;
 
-            await fss.writeFile(file_path, _code);
+            if (!this.noCache) await fss.writeFile(file_path, _code);
 
             this.code = _code;
 

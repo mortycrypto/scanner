@@ -12,8 +12,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TokenScanner = void 0;
 const Scanner_1 = require("./Scanner");
 class TokenScanner extends Scanner_1.Scanner {
-    constructor(address, network) {
-        super(address, network);
+    constructor(address, network, noCache) {
+        super(address, network, noCache);
         this.StaticProperties = [
             'name',
             'symbol',
@@ -53,9 +53,9 @@ class TokenScanner extends Scanner_1.Scanner {
             'isReducedFromFees(governance)',
         ];
     }
-    static new(address, network) {
+    static new(address, network, noCache) {
         return __awaiter(this, void 0, void 0, function* () {
-            return new TokenScanner(address, network);
+            return new TokenScanner(address, network, noCache);
         });
     }
     _updateCacheHook(token) {

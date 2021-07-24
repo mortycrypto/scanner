@@ -12,8 +12,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TimelockScanner = void 0;
 const Scanner_1 = require("./Scanner");
 class TimelockScanner extends Scanner_1.Scanner {
-    constructor(address, network) {
-        super(address, network);
+    constructor(address, network, noCache) {
+        super(address, network, noCache);
         this.StaticProperties = [
             'delay',
             'delay|div:3600',
@@ -25,9 +25,9 @@ class TimelockScanner extends Scanner_1.Scanner {
             'devWalletAddress'
         ];
     }
-    static new(address, network) {
+    static new(address, network, noCache) {
         return __awaiter(this, void 0, void 0, function* () {
-            return new TimelockScanner(address, network);
+            return new TimelockScanner(address, network, noCache);
         });
     }
     setPeriod(from, to) {

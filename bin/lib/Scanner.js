@@ -25,13 +25,14 @@ const provider_1 = require("./provider");
 const utils_1 = require("./utils");
 const DBCache_1 = require("./DBCache");
 class Scanner {
-    constructor(address, network) {
+    constructor(address, network, noCache) {
         this.abi = '';
         this.code = '';
         this.StaticProperties = [];
         this.FunctionProperties = [];
         this.address = address;
         this.network = network;
+        this.noCache = noCache || false;
         for (const [value, name] of Object.entries(provider_1.Network)) {
             if (this.network === name) {
                 this.domain = provider_1.Domains[value];
@@ -60,17 +61,19 @@ class Scanner {
             try {
                 if (this.abi.length > 0)
                     return this.abi;
-                // const file_path = `${process.cwd()}/temp/${this.address}.json`;
                 const file_path = `${__dirname}/../../temp/${this.address}.json`;
-                if (fs.existsSync(file_path)) {
-                    const content = yield fss.readFile(file_path);
-                    if (content.toString().startsWith('[')) {
-                        this.abi = JSON.parse(content.toString());
-                        return this.abi;
+                if (!this.noCache) {
+                    if (fs.existsSync(file_path)) {
+                        const content = yield fss.readFile(file_path);
+                        if (content.toString().startsWith('[')) {
+                            this.abi = JSON.parse(content.toString());
+                            return this.abi;
+                        }
                     }
                 }
                 const _abi = (yield axios_1.default.get(`https://api.${this.domain}.com/api?module=contract&action=getabi&address=${this.address}&apikey=${this.apiKey}`)).data.result;
-                yield fss.writeFile(file_path, _abi);
+                if (!this.noCache)
+                    yield fss.writeFile(file_path, _abi);
                 this.abi = _abi;
                 return this.abi;
             }
@@ -85,15 +88,18 @@ class Scanner {
                 if (this.code.length > 0)
                     return this.code;
                 const file_path = `${__dirname}/../../temp/codes/${this.address}.txt`;
-                if (fs.existsSync(file_path)) {
-                    const content = yield fss.readFile(file_path);
-                    if (content.toString() !== '') {
-                        this.code = content.toString();
-                        return this.code;
+                if (!this.noCache) {
+                    if (fs.existsSync(file_path)) {
+                        const content = yield fss.readFile(file_path);
+                        if (content.toString() !== '') {
+                            this.code = content.toString();
+                            return this.code;
+                        }
                     }
                 }
                 const _code = (yield axios_1.default.get(`https://api.${this.domain}.com/api?module=contract&action=getsourcecode&address=${this.address}&apikey=${this.apiKey}`)).data.result[0].SourceCode;
-                yield fss.writeFile(file_path, _code);
+                if (!this.noCache)
+                    yield fss.writeFile(file_path, _code);
                 this.code = _code;
                 return this.code;
             }
