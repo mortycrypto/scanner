@@ -17,12 +17,12 @@ export class TimelockScanner extends Scanner {
         'devWalletAddress'
     ];
 
-    protected constructor(address: Address, network: Network) {
-        super(address, network);
+    protected constructor(address: Address, network: Network, noCache?: boolean) {
+        super(address, network, noCache);
     }
 
-    public static async new(address: Address, network: Network): Promise<TimelockScanner> {
-        return new TimelockScanner(address, network);
+    public static async new(address: Address, network: Network, noCache?: boolean): Promise<TimelockScanner> {
+        return new TimelockScanner(address, network, noCache);
     }
 
     public setPeriod(from: number, to: number): void {

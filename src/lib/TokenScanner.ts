@@ -43,12 +43,12 @@ export class TokenScanner extends Scanner {
         'isReducedFromFees(governance)',
     ];
 
-    protected constructor(address: Address, network: Network) {
-        super(address, network);
+    protected constructor(address: Address, network: Network, noCache?: boolean) {
+        super(address, network, noCache);
     }
 
-    public static async new(address: Address, network: Network): Promise<TokenScanner> {
-        return new TokenScanner(address, network);
+    public static async new(address: Address, network: Network, noCache?: boolean): Promise<TokenScanner> {
+        return new TokenScanner(address, network, noCache);
     }
 
     protected async _updateCacheHook(token: Token): Promise<void> {

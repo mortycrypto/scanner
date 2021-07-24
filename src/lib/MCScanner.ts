@@ -31,11 +31,11 @@ export class MCScanner extends Scanner {
         'totalAllocPoint',
     ];
 
-    protected constructor(address: Address, network: Network) {
-        super(address, network);
+    protected constructor(address: Address, network: Network, noCache?: boolean) {
+        super(address, network, noCache);
     }
 
-    public static async new(address: Address, network: Network): Promise<MCScanner> {
-        return new MCScanner(address, network);
+    public static async new(address: Address, network: Network, noCache?: boolean): Promise<MCScanner> {
+        return new MCScanner(address, network, noCache);
     }
 }

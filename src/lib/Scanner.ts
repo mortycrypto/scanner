@@ -19,13 +19,15 @@ export class Scanner {
     protected _cache: DBCache;
     readonly domain: string;
     readonly apiKey: string;
+    readonly noCache: boolean;
 
     protected StaticProperties: string[] = [];
     protected FunctionProperties: string[] = [];
 
-    protected constructor(address: Address, network: Network) {
+    protected constructor(address: Address, network: Network, noCache?: boolean) {
         this.address = address;
         this.network = network;
+        this.noCache = noCache || false;
 
         for (const [value, name] of Object.entries(Network)) {
             if (this.network === name) {
@@ -55,14 +57,16 @@ export class Scanner {
         try {
             if (this.abi.length > 0) return this.abi;
 
-            // const file_path = `${process.cwd()}/temp/${this.address}.json`;
             const file_path = `${__dirname}/../../temp/${this.address}.json`;
 
-            if (fs.existsSync(file_path)) {
-                const content = await fss.readFile(file_path);
-                if (content.toString().startsWith('[')) {
-                    this.abi = JSON.parse(content.toString());
-                    return this.abi;
+            if (!this.noCache) {
+
+                if (fs.existsSync(file_path)) {
+                    const content = await fss.readFile(file_path);
+                    if (content.toString().startsWith('[')) {
+                        this.abi = JSON.parse(content.toString());
+                        return this.abi;
+                    }
                 }
             }
 
@@ -72,7 +76,7 @@ export class Scanner {
                 )
             ).data.result;
 
-            await fss.writeFile(file_path, _abi);
+            if (!this.noCache) await fss.writeFile(file_path, _abi);
 
             this.abi = _abi;
 
