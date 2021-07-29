@@ -114,7 +114,7 @@ const init = async () => {
 
                 // POLYGON => "0x93707607dB30758Cc612387216E10993971A9ad2|17143918"
                 const tl = await TimelockScanner.new(timelock, network);
-                tl.setPeriod(from, to);
+                tl.setPeriod(<number>from, <number>to);
 
                 data = { ...data, ... await tl.getProperties() };
 
@@ -189,5 +189,5 @@ async function getTokenData(address: any, data: Object): Promise<Object> {
 
 async function getMcData(McAddress: string, data: Object, _network: string): Promise<Object> {
     const MC = await MCScanner.new(McAddress, network);
-    return await MC.getProperties();
+    return { ... await MC.getProperties(), ...await MC.getPoolsInfo() };
 }

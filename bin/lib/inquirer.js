@@ -25,9 +25,9 @@ const block = (desc) => {
         {
             name: "block",
             message: `${desc} Block (Enter 0 to return to main menu): `,
-            type: "input",
+            type: "number",
             validate: function (value) {
-                if (value.length) {
+                if (value > -1) {
                     return true;
                 }
                 else {

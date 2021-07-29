@@ -14,6 +14,8 @@ const Scanner_1 = require("./Scanner");
 class TimelockScanner extends Scanner_1.Scanner {
     constructor(address, network, noCache) {
         super(address, network, noCache);
+        this.from = 0;
+        this.to = 0;
         this.StaticProperties = [
             'delay',
             'delay|div:3600',
@@ -31,6 +33,7 @@ class TimelockScanner extends Scanner_1.Scanner {
         });
     }
     setPeriod(from, to) {
+        console.log('from type: ', typeof from, 'this.from type: ', typeof this.from);
         this.from = from;
         this.to = to;
     }
@@ -50,6 +53,27 @@ class TimelockScanner extends Scanner_1.Scanner {
                 throw new Error(`BAD {FROM: ${this.from} TO: ${this.to}}`);
             const data = yield _super.getProperties.call(this);
             let obj = Object.assign({ address: this.address, fromBlock: this.from, toBlock: this.to > 0 ? this.to : yield this.getCurrentBlock() }, data);
+            this.to = obj.toBlock;
+            console.log(`Fetching Txs from ${this.from} to ${this.to}...`);
+            let predata = [];
+            for (let i = this.from; i <= this.to; i++) {
+                predata.push(this._provider.getBlockWithTransactions(i));
+            }
+            const blocks = yield Promise.all(predata);
+            const txs = blocks.map(block => { return block.transactions; });
+            let _txs = [];
+            const t = txs.map(tx => tx.forEach(_t => {
+                console.log(_t.to);
+                if (_t.to === this.address)
+                    _txs.push(_t);
+            }));
+            console.log(_txs);
+            //     .filter((tx: Tx) => {
+            //     console.log(tx.to, typeof tx.to, this.address, typeof this.address)
+            //     return tx.to === <string>this.address
+            // })
+            // console.log(txs, txs.length)
+            // console.log(blocks)
             return obj;
         });
     }

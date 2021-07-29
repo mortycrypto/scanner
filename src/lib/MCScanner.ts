@@ -38,4 +38,28 @@ export class MCScanner extends Scanner {
     public static async new(address: Address, network: Network, noCache?: boolean): Promise<MCScanner> {
         return new MCScanner(address, network, noCache);
     }
+
+    public async getPoolsInfo(): Promise<Object> {
+        if (!this.instance["poolLength"]) return {}
+
+        const poolLength = await this.instance["poolLength"]();
+
+        let predata = [];
+
+        for (let i = 0; i < poolLength; i++) {
+            predata.push(this.instance["poolInfo"](i))
+        }
+
+        let data: any[] = await Promise.all(predata);
+
+        let obj = {}
+
+        for (let i = 0; i < data.length; i++) {
+            let _pool = data[i].join(" | ");
+            obj[`Pool #${i}`] = _pool;
+        }
+
+        return obj;
+
+    }
 }

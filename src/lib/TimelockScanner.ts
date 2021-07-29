@@ -2,9 +2,37 @@ import { Address } from './Cache';
 import { Network } from './provider';
 import { Scanner } from './Scanner';
 
+interface Tx {
+    hash: string,
+    type: number,
+    accessList: any,
+    blockHash: string,
+    blockNumber: number,
+    transactionIndex: number,
+    confirmations: number,
+    from: string,
+    gasPrice: number,
+    gasLimit: number,
+    to: string,
+    value: number,
+    nonce: number,
+    data: string,
+    r: string,
+    s: string,
+    v: number,
+    creates: any,
+    chainId: number
+}
+
+interface IndividualTx {
+    from: string,
+    to: string,
+    data: string
+}
+
 export class TimelockScanner extends Scanner {
-    private from: number;
-    private to: number;
+    private from: number = 0;
+    private to: number = 0;
 
     protected StaticProperties: string[] = [
         'delay',
@@ -26,6 +54,7 @@ export class TimelockScanner extends Scanner {
     }
 
     public setPeriod(from: number, to: number): void {
+        console.log('from type: ', typeof from, 'this.from type: ', typeof this.from)
         this.from = from;
         this.to = to;
     }
@@ -47,6 +76,42 @@ export class TimelockScanner extends Scanner {
             toBlock: this.to > 0 ? this.to : await this.getCurrentBlock(),
             ...data
         };
+
+        this.to = obj.toBlock;
+
+        console.log(`Fetching Txs from ${this.from} to ${this.to}...`)
+
+        let predata = [];
+
+        for (let i = this.from; i <= this.to; i++) {
+            predata.push(
+                this._provider.getBlockWithTransactions(i)
+            );
+        }
+
+        const blocks = await Promise.all(predata);
+
+        const txs = blocks.map(block => { return block.transactions })
+
+        let _txs = [];
+
+        const t = txs.map(tx => tx.forEach(_t => {
+            console.log(_t.to)
+            if (_t.to === this.address) _txs.push(_t)
+        }))
+
+        console.log(_txs)
+
+
+
+        //     .filter((tx: Tx) => {
+        //     console.log(tx.to, typeof tx.to, this.address, typeof this.address)
+        //     return tx.to === <string>this.address
+        // })
+
+        // console.log(txs, txs.length)
+
+        // console.log(blocks)
 
         return obj;
 

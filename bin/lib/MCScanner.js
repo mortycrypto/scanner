@@ -47,5 +47,23 @@ class MCScanner extends Scanner_1.Scanner {
             return new MCScanner(address, network, noCache);
         });
     }
+    getPoolsInfo() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.instance["poolLength"])
+                return {};
+            const poolLength = yield this.instance["poolLength"]();
+            let predata = [];
+            for (let i = 0; i < poolLength; i++) {
+                predata.push(this.instance["poolInfo"](i));
+            }
+            let data = yield Promise.all(predata);
+            let obj = {};
+            for (let i = 0; i < data.length; i++) {
+                let _pool = data[i].join(" | ");
+                obj[`Pool #${i}`] = _pool;
+            }
+            return obj;
+        });
+    }
 }
 exports.MCScanner = MCScanner;
