@@ -4,7 +4,8 @@ export enum Network {
     BSC = "https://bsc-dataseed3.ninicoin.io",
     // POLYGON = "https://rpc-waultfinance-mainnet.maticvigil.com/v1/0bc1bb1691429f1eeee66b2a4b919c279d83d6b0",
     POLYGON = "https://rpc-mainnet.matic.quiknode.pro",
-    FTM = "https://rpcapi.fantom.network",
+    FTM = "https://rpc.ftm.tools",
+    // FTM = "https://rpc.neist.io",
 }
 
 export enum Domains {
@@ -16,7 +17,7 @@ export enum Domains {
 export enum ApiKeys {
     BSC = "HVUJ1ZG4KNVTDCMQQBJA711QMFKJXPWNQT",
     POLYGON = "T2Q3CVQQK8B1G7I29I1CM1V7M767WHZCZT",
-    FTM = "",
+    FTM = "PZ2F2ISH5KGUFD9KZGVEKJZ65GV3QRV5V9",
 }
 
 export class RPCConnection {

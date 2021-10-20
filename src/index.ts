@@ -188,6 +188,6 @@ async function getTokenData(address: any, data: Object): Promise<Object> {
 }
 
 async function getMcData(McAddress: string, data: Object, _network: string): Promise<Object> {
-    const MC = await MCScanner.new(McAddress, network);
+    const MC = await MCScanner.new(McAddress, network, true);
     return { ... await MC.getProperties(), ...await MC.getPoolsInfo() };
 }

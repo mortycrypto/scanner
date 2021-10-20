@@ -152,7 +152,7 @@ function getTokenData(address, data) {
 }
 function getMcData(McAddress, data, _network) {
     return __awaiter(this, void 0, void 0, function* () {
-        const MC = yield MCScanner_1.MCScanner.new(McAddress, network);
+        const MC = yield MCScanner_1.MCScanner.new(McAddress, network, true);
         return Object.assign(Object.assign({}, yield MC.getProperties()), yield MC.getPoolsInfo());
     });
 }
