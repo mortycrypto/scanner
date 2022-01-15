@@ -5,6 +5,7 @@ import { Scanner } from "./Scanner";
 export class MCScanner extends Scanner {
     protected StaticProperties = [
         'startBlock',
+        'startTime',
         'owner',
         'owner|iseoa',
         'owner|timelock',

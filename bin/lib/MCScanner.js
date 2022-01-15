@@ -16,6 +16,7 @@ class MCScanner extends Scanner_1.Scanner {
         super(address, network, noCache);
         this.StaticProperties = [
             'startBlock',
+            'startTime',
             'owner',
             'owner|iseoa',
             'owner|timelock',

@@ -230,8 +230,8 @@ export class Scanner {
             await this._updateCacheHook({ symbol: <string>obj["symbol"], address: this.address })
         }
 
-        if (obj['startBlock'])
-            obj['Countdown'] = `https://${this.domain}.com/block/countdown/${obj['startBlock']}`;
+        if (obj['startBlock'] || obj['startTime'])
+            obj['Countdown'] = `https://${this.domain}.com/block/countdown/${obj['startBlock'] || obj['startTime']}`;
 
         if (obj['address']) obj["Code"] = `https://${this.domain}.com/address/${obj['address']}#code`
         if (obj['Timelock'] && obj['owner']) obj["TL Code"] = `https://${this.domain}.com/address/${obj['owner'].split(' ')[0]}#code`
